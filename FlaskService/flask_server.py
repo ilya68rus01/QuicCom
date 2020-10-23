@@ -23,4 +23,3 @@ class ODQA(Resource):
 			answer = "Затрудняюсь ответить"
 		print(answer)
 		return {"answer": answer}, 200
-
