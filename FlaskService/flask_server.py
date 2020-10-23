@@ -4,7 +4,7 @@ from flask_restful import Resource, reqparse
 
 def start():
 	api.add_resource(ODQA, "/get_answer", "/get_answer/")
-	app.run(debug=True, host='0.0.0.0', port=80)
+	app.run(debug=True, host='0.0.0.0', port=8000)
 
 
 class ODQA(Resource):
@@ -14,7 +14,7 @@ class ODQA(Resource):
 		args = parser.parse_args()
 		question = args['question']
 		print(question)
-		answer = question + "awdasfse"
+		answer = question + " ответ"
 		if answer == "" or answer == None:
 			answer = "Затрудняюсь ответить"
 		print(answer)
