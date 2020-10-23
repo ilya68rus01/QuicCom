@@ -13,7 +13,11 @@ class PredictorService:
         self.patterns = "[A-Za-z0-9!#$%&'()*+,./:;<=>?@[\]^_`{|}~—\"\-]+"
         self.stopwords_ru = stopwords.words("russian")
         self.morph = MorphAnalyzer()
-        self.data_frame = pd.read_csv("../lemm.csv", delimiter=';')
+        self.data_fr = pd.read_csv('dataframe.csv', delimiter=';')
+        self.data_frame = pd.Series(self.data_fr['Comment'])
+        self.data_frame = self.data_frame.dropna().drop_duplicates()
+        self.data_frame = self.data_frame.apply(self.lemmatize)
+        self.data_frame = self.data_frame.dropna()
         self.__create_model__()
 
     def __create_model__(self):
@@ -45,3 +49,16 @@ class PredictorService:
         except:
             answer = "Я не знаю этого слова :("
         return answer
+
+    def lemmatize(self, doc):
+        doc = re.sub(self.patterns, ' ', doc)
+        tokens = []
+        for token in doc.split():
+            if token and token not in self.stopwords_ru:
+                token = token.strip()
+                token = self.morph.normal_forms(token)[0]
+
+                tokens.append(token)
+        if len(tokens) > 2:
+            return tokens
+        return None
