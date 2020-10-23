@@ -7,7 +7,7 @@ def start():
 	global predictor
 	predictor = PredictorService()
 	api.add_resource(ODQA, "/get_answer", "/get_answer/")
-	app.run(debug=True, host='0.0.0.0', port=80)
+	app.run(debug=True, host='0.0.0.0', port=8000)
 
 
 class ODQA(Resource):
