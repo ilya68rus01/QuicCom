@@ -1,4 +1,6 @@
 import re
+import time
+
 import nltk
 from pymorphy2 import MorphAnalyzer
 from nltk.corpus import stopwords
@@ -10,6 +12,8 @@ from gensim.models import Word2Vec
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import load_model
+import logging
+import sys
 
 
 class PredictorService:
@@ -19,7 +23,16 @@ class PredictorService:
         self.stopwords_ru = stopwords.words("russian")
         self.morph = MorphAnalyzer()
         self.ann_model = keras.Sequential()
+        logging.basicConfig(filename="sample.log", level=logging.ERROR)
+        self.logger = logging.getLogger("PredictorService")
+        self.logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler("test.log")
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
+        self.logger.debug("Prepare data starting...")
         self.__preparing_data__()
+        self.logger.debug("Prepate data comlited")
 
 
     def __preparing_data__(self):
@@ -42,13 +55,18 @@ class PredictorService:
         return None
 
     def convert_to_vec(self):
+        self.logger.debug("w2v model is starting...")
         self.__create_w2v_model__()
+        self.logger.debug("w2v model is comleted.")
         (X, y) = self.split_sentence(self.data_frame)
+        self.logger.debug("Split completed")
         X_all = self.convert_x(X)
+        self.logger.debug("X convert complited.")
         y_all = self.convert_y(y)
+        self.logger.debug("y convert complited.")
         self.create_ann()
         train_info = self.ann_model.fit(X_all, y_all, epochs=100, verbose=1)
-
+        self.logger.debug("ANN learning comlited.")
         self.ann_model.save("model_big.h5")
 
     def convert_x(self, data):
@@ -114,7 +132,7 @@ class PredictorService:
             sg=1)
         self.w2v_model.build_vocab(self.data_frame)
         self.w2v_model.train(self.data_frame, total_examples=self.w2v_model.corpus_count,
-                             epochs=600, report_delay=1)
+                             epochs=300, report_delay=1)
 
     def batch_train_ann_model(self, data):
         sentence = self.preparing_data_for_predict(data)
