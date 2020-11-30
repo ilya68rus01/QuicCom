@@ -47,7 +47,9 @@ class PredictorService:
         X_all = self.convert_x(X)
         y_all = self.convert_y(y)
         self.create_ann()
-        train_info = self.ann_model.fit(X_all, y_all, epochs=50, verbose=1)
+        train_info = self.ann_model.fit(X_all, y_all, epochs=100, verbose=1)
+
+        self.ann_model.save("model_big.h5")
 
     def convert_x(self, data):
         try:
@@ -102,7 +104,7 @@ class PredictorService:
 
     def __create_w2v_model__(self):
         self.w2v_model = Word2Vec(
-            min_count=3,
+            min_count=6,
             window=3,
             size=70,
             negative=10,
