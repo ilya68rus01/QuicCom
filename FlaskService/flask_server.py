@@ -6,8 +6,8 @@ from PredictorService.PredictorService import *
 def start():
 	global predictor
 	predictor = PredictorService()
-	predictor.__create_w2v_model__()
-	predictor.__load_ann__()
+	# predictor.__create_w2v_model__()
+	predictor.convert_to_vec()
 	api.add_resource(ODQA, "/get_answer", "/get_answer/")
 	app.run(debug=True, host='0.0.0.0', port=8000)
 
