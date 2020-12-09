@@ -8,6 +8,7 @@ def start():
 	predictor = PredictorService()
 	# predictor.__create_w2v_model__()
 	predictor.convert_to_vec()
+	predictor.ann_model.save("big_model.h5")
 	api.add_resource(ODQA, "/get_answer", "/get_answer/")
 	app.run(debug=True, host='0.0.0.0', port=8000)
 
