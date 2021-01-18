@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from collections import defaultdict
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, KeyedVectors
 from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.models import load_model
@@ -18,8 +18,11 @@ class PredictorService:
         self.patterns = "[A-Za-z0-9!#$%&'()*+,./:;<=>?@[\]^_`{|}~—\"\-]+"
         self.stopwords_ru = stopwords.words("russian")
         self.morph = MorphAnalyzer()
-        self.ann_model = keras.Sequential()
-        self.__preparing_data__()
+        self.create_ann()
+        self.ann_model.load_weights("big_model.h5")
+        print("prepare data")
+        #self.__preparing_data__()
+        print("data prepared")
 
 
     def __preparing_data__(self):
@@ -41,8 +44,21 @@ class PredictorService:
             return tokens
         return None
 
+    def main(self):
+        try:
+            self.w2v_model = KeyedVectors.load("word2vec.wordvectors", mmap='r')
+            print("w2v load")
+        except:
+            print("error")
+            self.__create_w2v_model__()
+        #self.__load_ann__()
+        print("ann load")
+
     def convert_to_vec(self):
-        self.__create_w2v_model__()
+        try:
+            self.w2v_model.load("word2vec.wordvectors")
+        except:
+            self.__create_w2v_model__()
         (X, y) = self.split_sentence(self.data_frame)
         X_all = self.convert_x(X)
         y_all = self.convert_y(y)
@@ -130,12 +146,15 @@ class PredictorService:
         (x, y) = self.split_sentence(sentence)
         x = self.convert_x(x)
         y = self.convert_y(y)
-        pred = self.ann_model.predict(x)
-        for vec in pred:
-            next_possible_words = self.w2v_model.wv.similar_by_vector(vec, topn=5)
-        lst = list()
-        for word in next_possible_words:
-            lst.append(word[0])
+        try:
+            pred = self.ann_model.predict(x)
+            for vec in pred:
+                next_possible_words = self.w2v_model.wv.similar_by_vector(vec, topn=5)
+            lst = list()
+            for word in next_possible_words:
+                lst.append(word[0])
+        except:
+            lst = list()
         return lst
 
     def preparing_data_for_predict(self, sentence):
@@ -147,6 +166,7 @@ class PredictorService:
 
     def __load_ann__(self):
         try:
-            self.ann_model = load_model("worked_ann_model.h5")
+            self.ann_model = keras.models.Sequential()
+            self.ann_model = load_model("big_model.h5")
         except:
             print("File load error")
